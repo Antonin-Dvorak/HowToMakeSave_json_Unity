@@ -85,13 +85,14 @@ public class PlaneSaveLoad : MonoBehaviour
         }
     }
 
-
+//追記開始
     [System.Serializable]
     public class PlayerData
     {
         public string flagToSave;
     }
     PlayerData myData = new PlayerData();
+//追記終了
 }
 ```
 もしご自身でbool値やint値を変数として扱いたい場合、`PlayerData`内にどんどん追加していけば良い、というわけですね。…………。  
@@ -108,9 +109,10 @@ using UnityEngine;
 
 public class PlaneSaveLoad : MonoBehaviour
 {
+//追記開始
     [SerializeField] GameObject[] planes = new GameObject[3];//インスペクター上でplane1~3を入れてください
     string flagStr;//flagStrToSave（シリアライズ化してjsonに書き込むための変数）に値を送るための変数
-
+//追記終了
 
     public void SwitchPlane(GameObject obj)
     {
@@ -132,7 +134,7 @@ public class PlaneSaveLoad : MonoBehaviour
     }
     PlayerData myData = new PlayerData();
 
-
+//追記開始
     public void OnClickToSave()
     {
         flagStr = "";//初期化
@@ -149,6 +151,7 @@ public class PlaneSaveLoad : MonoBehaviour
         }
         Debug.Log(flagStr + "をセーブ");
     }
+//追記終了
 }
 ```
 コメントでそれぞれの文の意味を注釈しておきましたが、念のため何をしているのかもう一度日本語で書いておきます。  
@@ -168,7 +171,9 @@ public class PlaneSaveLoad : MonoBehaviour
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+//追記開始
 using System.IO;
+//追記終了
 
 public class PlaneSaveLoad : MonoBehaviour
 {
@@ -213,17 +218,18 @@ public class PlaneSaveLoad : MonoBehaviour
         }
         Debug.Log(flagStr + "をセーブ");
 
-
+//追記開始
         StreamWriter writer;
         myData.flagStrToSave = flagStr;//ここでflagStrToSaveにflagStrの文字を渡す
 
         string jsonStr = JsonUtility.ToJson(myData);
-        Debug.Log("jsonStrは今" + jsonStr + "です");
+        Debug.Log("jsonstrは今" + jsonStr + "です");
 
         writer = new StreamWriter(Application.dataPath + "/save.json", false);
         writer.Write(jsonStr);
         writer.Flush();
         writer.Close();
+//追記終了
     }
 }
 ```
@@ -303,7 +309,7 @@ public class PlaneSaveLoad : MonoBehaviour
         writer.Close();
     }
     
-
+//追記開始
     public void OnClickToLoad()
     {
         if (File.Exists(Application.dataPath + "/save.json"))
@@ -343,6 +349,7 @@ public class PlaneSaveLoad : MonoBehaviour
             }
         }
     }
+//追記終了
 }
 ```
 「サルでもわかるって言ったやないか！まったくわからんわ！」という怒号が飛んできそうですね。落ち着いてください。やっていることはセーブの逆です。セーブの手順は、1文字ずつ文字を格納していって、jsonファイルに書き込んでますよね。ロードではこの逆を行います。  
@@ -355,11 +362,15 @@ public class PlaneSaveLoad : MonoBehaviour
 ![Assets 2022_06_30 17_11_01](https://user-images.githubusercontent.com/82185511/176627153-bb7cd747-3e70-4c3c-a483-767ef812ce95.png)  
 この状態で再度Loadボタンを押してみましょう。すると……  
 ![PlaneTest - SampleScene - PC, Mac   Linux Standalone - Unity 2020 3 29f1 Personal_ _DX11_ 2022_06_30 17_15_23](https://user-images.githubusercontent.com/82185511/176627979-3801da4e-c17b-4c3e-9136-283fec6f936e.png)  
-「セーブデータはありません。」とコンソールに表示されます！これで完成です！！
+「セーブデータはありません。」とコンソールに表示されます！これで完成です！！  
+・  
+・  
+・  
+ビルドしてもjsonでのセーブシステムは正常に動きますよ。ただ注意なのが、プラットフォームによって`Application.dataPath`の部分を変えた方がいいということです。Standalone（パソコンで動かす）ならこのままで大丈夫ですが、iOSでは`Application.persistentDataPath`、Androidではまた違ったパスがふさわしいようなので、プラットフォームごとに調べながらよさげな場所を指定した方がよさそうです。
 
 ## さいごに
 「サルでもわかる」の謳い文句につられたあなたは不覚にもfor文を覚えてしまった訳ですが、今回のセーブ方式には良いところがあります。Saveで作成したjsonファイルを開いてみましょう。  
 `{"flagStrToSave":"111"}`  
-このように、我々はゲームの制作者ですからこの数字が意味するところは分かりますが、勘の悪いゲームのプレイヤーからしたら「111？なんのこっちゃ？」と思うことでしょう。つまり、セーブの変数をもっと複雑にすれば、jsonファイルをいじられてセーブデータを改造される恐れがなくなる、いわゆる**暗号化**処理が行えます。  
+このように、我々はゲームの制作者ですからこの数字が意味するところは分かりますが、勘の悪いプレイヤーが見れば「111？なんのこっちゃ？」と思うことでしょう。つまり、セーブの変数をもっと複雑にすれば、jsonファイルをいじられてセーブデータを改造される恐れがなくなる、いわゆる**暗号化**処理が行えます。  
 
 いかがでしたでしょうか。もしわからないところがあればコメントして頂ければ答えらえる範囲でお答えいたします。ではまた。🐒  
